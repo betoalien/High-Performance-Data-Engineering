@@ -4,7 +4,7 @@ description: A comprehensive course on integrating Python and Rust for high-perf
 theme: just-the-docs
 
 # Base URL for GitHub Pages
-baseurl: "/dataengineering_rust_python"
+baseurl: "/High-Performance-Data-Engineering"
 url: "https://betoalien.com"
 
 # Navigation settings
