@@ -232,12 +232,14 @@ pub fn hash_join_managers(
     let mut hash_map = std::collections::HashMap::new();
     for block in &right.blocks {
         // Build index on right_key column
+        // ... (implementation details omitted for brevity — see compute/join.rs)
     }
 
     // 2. Probe with left side
     let mut result_blocks = Vec::new();
     for block in &left.blocks {
         // Find matching rows using hash lookup
+        // ... (implementation details omitted for brevity — see compute/join.rs)
     }
 
     Ok(HyperBlockManager {
@@ -332,8 +334,8 @@ This ensures the string remains valid until the next FFI call on the same thread
 # Cargo.toml
 
 [package]
-name = "pardox-cpu"
-version = "0.4.0"
+name = "hyperframe-core"
+version = "0.1.0"
 edition = "2021"
 
 [lib]
@@ -353,9 +355,9 @@ panic = "abort"      # Smaller binaries, no unwind tables
 cargo build --release
 
 # Output locations by platform:
-# Linux:   target/release/libpardox_cpu.so
-# macOS:   target/release/libpardox_cpu.dylib
-# Windows: target/release/pardox_cpu.dll
+# Linux:   target/release/libhyperframe_core.so
+# macOS:   target/release/libhyperframe_core.dylib
+# Windows: target/release/hyperframe_core.dll
 ```
 
 ### Cross-Compilation
@@ -389,7 +391,7 @@ cargo test
 cargo clippy --release
 
 # Verify exported symbols (Linux example)
-nm -D target/release/libpardox_cpu.so | grep pardox_
+nm -D target/release/libhyperframe_core.so | grep hf_
 ```
 
 ## Summary

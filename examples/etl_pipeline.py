@@ -16,10 +16,10 @@ from pathlib import Path
 
 # Import from the hybrid SDK
 try:
-    from pardox import DataFrame, read_csv
+    from hyperframe import DataFrame, read_csv
 except ImportError:
-    print("Error: pardox SDK not installed.")
-    print("Run: pip install -e pardox_project_sdk/")
+    print("Error: hyperframe SDK not installed.")
+    print("Run: pip install -e hyperframe_sdk/")
     raise
 
 
@@ -66,7 +66,7 @@ def extract_orders(csv_path: str) -> DataFrame:
     return df
 
 
-def transform_data(df: DataFrame) -> DataFrame:
+def transform_data(df: DataFrame, config: PipelineConfig) -> DataFrame:
     """
     TRANSFORM: Clean and enrich the data.
 
@@ -80,8 +80,8 @@ def transform_data(df: DataFrame) -> DataFrame:
 
     # Handle null values
     print("  Filling null values...")
-    df.fill_na("quantity", PipelineConfig.null_quantity_default)
-    df.fill_na("unit_price", PipelineConfig.null_price_default)
+    df.fill_na("quantity", config.null_quantity_default)
+    df.fill_na("unit_price", config.null_price_default)
 
     # Add derived columns (vectorized arithmetic in Rust)
     print("  Adding derived columns...")
@@ -89,8 +89,8 @@ def transform_data(df: DataFrame) -> DataFrame:
     df["order_month"] = df["order_date"].str.slice(0, 7)  # "YYYY-MM"
 
     # Filter to meaningful orders
-    print(f"  Filtering orders with value > ${PipelineConfig.filter_threshold}...")
-    df = df[df["total_value"] > PipelineConfig.filter_threshold]
+    print(f"  Filtering orders with value > ${config.filter_threshold}...")
+    df = df[df["total_value"] > config.filter_threshold]
 
     elapsed = time.time() - start
     print(f"  Transform completed in {elapsed:.2f}s")
@@ -157,7 +157,7 @@ def run_pipeline(config: PipelineConfig) -> tuple:
 
     # Execute pipeline stages
     df = extract_orders(config.input_path)
-    df = transform_data(df)
+    df = transform_data(df, config)
     regional, monthly = load_data(df, config)
 
     total_elapsed = time.time() - total_start

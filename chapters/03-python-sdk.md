@@ -26,7 +26,7 @@ For our use case (distributing precompiled binaries with no Python dependencies)
 ### Loading the Shared Library
 
 ```python
-# wrapper.py
+# hyperframe/wrapper.py
 
 import ctypes
 import os
@@ -38,18 +38,18 @@ system_os = sys.platform
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 if system_os == "win32":
-    lib_name = "pardox-cpu-Windows-x64.dll"
+    lib_name = "hyperframe-Windows-x64.dll"
     lib_folder = os.path.join(current_dir, "libs", "Win")
 elif system_os == "linux":
-    lib_name = "pardox-cpu-Linux-x64.so"
+    lib_name = "hyperframe-Linux-x64.so"
     lib_folder = os.path.join(current_dir, "libs", "Linux")
 elif system_os == "darwin":
     lib_folder = os.path.join(current_dir, "libs", "Mac")
     machine_arch = platform.machine().lower()
     if "arm64" in machine_arch:
-        lib_name = "pardox-cpu-MacOS-ARM64.dylib"
+        lib_name = "hyperframe-MacOS-ARM64.dylib"
     elif "x86_64" in machine_arch:
-        lib_name = "pardox-cpu-MacOS-Intel.dylib"
+        lib_name = "hyperframe-MacOS-Intel.dylib"
     else:
         raise OSError(f"Unsupported architecture: {machine_arch}")
 else:
@@ -59,7 +59,7 @@ else:
 lib_path = os.path.join(lib_folder, lib_name)
 
 if not os.path.exists(lib_path):
-    raise ImportError(f"PardoX Core binary not found at: {lib_path}")
+    raise ImportError(f"HyperFrame Core binary not found at: {lib_path}")
 
 # Add libs to LD_LIBRARY_PATH for transitive dependencies
 _existing_ld = os.environ.get("LD_LIBRARY_PATH", "")
@@ -69,7 +69,7 @@ if lib_folder not in _existing_ld:
 try:
     lib = ctypes.CDLL(lib_path)
 except OSError as e:
-    raise ImportError(f"Failed to load PardoX Core: {e}")
+    raise ImportError(f"Failed to load HyperFrame Core: {e}")
 ```
 
 ### Defining C Type Signatures
@@ -87,25 +87,25 @@ c_size_t = ctypes.c_size_t
 # Core API: Memory Management
 # =============================================================================
 
-# pardox_free_manager(*Manager) - Release Rust-allocated memory
-lib.pardox_free_manager.argtypes = [c_void_p]
-lib.pardox_free_manager.restype = None
+# hf_free_manager(*Manager) - Release Rust-allocated memory
+lib.hf_free_manager.argtypes = [c_void_p]
+lib.hf_free_manager.restype = None
 
 # =============================================================================
 # Core API: Data Loading
 # =============================================================================
 
-# pardox_load_manager_csv(path, schema_json, config_json) -> *Manager
-lib.pardox_load_manager_csv.argtypes = [c_char_p, c_char_p, c_char_p]
-lib.pardox_load_manager_csv.restype = c_void_p
+# hf_load_csv(path, schema_json, config_json) -> *Manager
+lib.hf_load_csv.argtypes = [c_char_p, c_char_p, c_char_p]
+lib.hf_load_csv.restype = c_void_p
 
 # =============================================================================
 # Core API: Joins
 # =============================================================================
 
-# pardox_hash_join(left, right, left_key, right_key) -> *Manager
-lib.pardox_hash_join.argtypes = [c_void_p, c_void_p, c_char_p, c_char_p]
-lib.pardox_hash_join.restype = c_void_p
+# hf_hash_join(left, right, left_key, right_key) -> *Manager
+lib.hf_hash_join.argtypes = [c_void_p, c_void_p, c_char_p, c_char_p]
+lib.hf_hash_join.restype = c_void_p
 ```
 
 ## Designing a Pythonic Wrapper
@@ -115,7 +115,7 @@ lib.pardox_hash_join.restype = c_void_p
 We create a `DataFrame` class that wraps the raw pointer:
 
 ```python
-# frame.py
+# hyperframe/frame.py
 
 class DataFrame:
     """
@@ -161,10 +161,10 @@ class DataFrame:
             json_bytes = ndjson_str.encode('utf-8')
 
             # Call Rust FFI
-            new_ptr = lib.pardox_read_json_bytes(json_bytes, len(json_bytes))
+            new_ptr = lib.hf_read_json_bytes(json_bytes, len(json_bytes))
 
             if not new_ptr:
-                raise RuntimeError("PardoX Core failed to ingest data.")
+                raise RuntimeError("Engine failed to ingest data.")
 
             self._ptr = new_ptr
 
@@ -181,7 +181,7 @@ class DataFrame:
     def __del__(self):
         """Critical: Free Rust memory when Python object is garbage collected."""
         if self._ptr is not None:
-            lib.pardox_free_manager(self._ptr)
+            lib.hf_free_manager(self._ptr)
             self._ptr = None
 ```
 
@@ -220,7 +220,7 @@ class MathMixin:
 
     def __add__(self, other):
         """Element-wise addition."""
-        result_ptr = lib.pardox_series_add(
+        result_ptr = lib.hf_series_add(
             self._ptr,
             self._key_column,
             other._ptr,
@@ -230,7 +230,7 @@ class MathMixin:
 
     def sum(self, column: str) -> float:
         """Aggregate sum of a column."""
-        return lib.pardox_aggregate_sum(self._ptr, column.encode())
+        return lib.hf_aggregate_sum(self._ptr, column.encode())
 
 
 class SelectionMixin:
@@ -245,17 +245,17 @@ class SelectionMixin:
             # Row slicing: df[100:200]
             start = key.start or 0
             length = (key.stop or self.num_rows) - start
-            ptr = lib.pardox_slice_manager(self._ptr, start, length)
+            ptr = lib.hf_slice_manager(self._ptr, start, length)
             return DataFrame._from_ptr(ptr)
 
     def head(self, n: int = 5) -> "DataFrame":
         """Return first n rows."""
-        ptr = lib.pardox_slice_manager(self._ptr, 0, n)
+        ptr = lib.hf_slice_manager(self._ptr, 0, n)
         return DataFrame._from_ptr(ptr)
 
     def tail(self, n: int = 5) -> "DataFrame":
         """Return last n rows."""
-        ptr = lib.pardox_tail_manager(self._ptr, n)
+        ptr = lib.hf_tail_manager(self._ptr, n)
         return DataFrame._from_ptr(ptr)
 
 
@@ -265,21 +265,21 @@ class MetadataMixin:
     @property
     def shape(self) -> tuple[int, int]:
         """Return (rows, columns) tuple."""
-        n_rows = lib.pardox_get_row_count(self._ptr)
-        schema_json = lib.pardox_get_schema_json(self._ptr)
+        n_rows = lib.hf_get_row_count(self._ptr)
+        schema_json = lib.hf_get_schema_json(self._ptr)
         n_cols = len(json.loads(schema_json.decode()))
         return (n_rows, n_cols)
 
     @property
     def columns(self) -> list[str]:
         """Return list of column names."""
-        schema_json = lib.pardox_get_schema_json(self._ptr)
+        schema_json = lib.hf_get_schema_json(self._ptr)
         schema = json.loads(schema_json.decode())
         return list(schema.keys())
 
     def info(self) -> str:
         """Return DataFrame summary."""
-        return lib.pardox_manager_to_ascii(self._ptr, 20).decode()
+        return lib.hf_manager_to_ascii(self._ptr, 20).decode()
 ```
 
 ## Error Handling Across the Boundary
@@ -292,7 +292,7 @@ Rust functions that can fail return error codes or null pointers:
 // api.rs
 
 #[no_mangle]
-pub extern "C" fn pardox_load_manager_csv(
+pub extern "C" fn hf_load_csv(
     path: *const c_char,
     schema_json: *const c_char,
     config_json: *const c_char,
@@ -306,7 +306,7 @@ pub extern "C" fn pardox_load_manager_csv(
     match load_csv_internal(&path_str, schema_json, config_json) {
         Ok(manager) => Box::into_raw(Box::new(manager)),
         Err(e) => {
-            eprintln!("[RUST ERROR] CSV load failed: {}", e);
+            eprintln!("[ENGINE ERROR] CSV load failed: {}", e);
             std::ptr::null_mut()  // Signal failure to Python
         }
     }
@@ -321,7 +321,7 @@ def load_csv(path: str) -> DataFrame:
     path_bytes = path.encode('utf-8')
 
     # Call Rust function
-    ptr = lib.pardox_load_manager_csv(path_bytes, None, None)
+    ptr = lib.hf_load_csv(path_bytes, None, None)
 
     # Check for null pointer (failure)
     if not ptr:
@@ -351,17 +351,17 @@ pub fn set_error(s: String) -> *const c_char {
 }
 
 #[no_mangle]
-pub extern "C" fn pardox_get_last_error() -> *const c_char {
+pub extern "C" fn hf_get_last_error() -> *const c_char {
     ERROR_BUFFER.with(|buf| buf.borrow().as_ptr())
 }
 ```
 
 ```python
-# wrapper.py
+# hyperframe/wrapper.py
 
 def get_last_error() -> str:
     """Retrieve last error message from Rust."""
-    ptr = lib.pardox_get_last_error()
+    ptr = lib.hf_get_last_error()
     if ptr:
         return ctypes.c_char_p(ptr).value.decode()
     return "Unknown error"
@@ -417,7 +417,7 @@ config = {
 }
 config_json = json.dumps(config).encode('utf-8')
 
-ptr = lib.pardox_load_manager_csv(
+ptr = lib.hf_load_csv(
     path_bytes,
     schema_json,
     config_json,
@@ -431,12 +431,12 @@ Critical rule: **Whoever allocates must free**.
 ```rust
 // Pattern 1: Rust allocates, Python frees via FFI
 #[no_mangle]
-pub extern "C" fn pardox_create_block(...) -> *mut HyperBlock {
+pub extern "C" fn hf_create_block(...) -> *mut HyperBlock {
     let block = HyperBlock::new(names, types);
     Box::into_raw(Box::new(block))  // Rust allocates
 }
 
-// Python must call pardox_free_manager() when done
+// Python must call hf_free_manager() when done
 ```
 
 ```rust
@@ -457,8 +457,8 @@ pub fn set_global_buffer(s: String) -> *const c_char {
 ### Project Structure
 
 ```
-pardox_sdk/
-├── pardox/
+hyperframe_sdk/
+├── hyperframe/
 │   ├── __init__.py      # Public API exports
 │   ├── wrapper.py       # ctypes FFI layer
 │   ├── frame.py         # DataFrame class
@@ -477,20 +477,21 @@ pardox_sdk/
 
 ```python
 """
-PardoX SDK - High-Performance DataFrame Engine
+HyperFrame SDK - High-Performance DataFrame Engine
 """
 
 from .frame import DataFrame
 from .series import Series
-from .io import read_csv, read_json, read_sql, read_parquet
+from .io import read_csv, read_json, read_sql
 
-__version__ = "0.4.0"
-__all__ = ["DataFrame", "Series", "read_csv", "read_json", "read_sql", "read_parquet"]
+__version__ = "0.1.0"
+__all__ = ["DataFrame", "Series", "read_csv", "read_json", "read_sql"]
 ```
 
 ### I/O Functions (`io.py`)
 
 ```python
+# hyperframe/io.py
 from .frame import DataFrame
 from .wrapper import lib, c_char_p, c_void_p
 
@@ -508,7 +509,7 @@ def read_csv(path: str, schema: dict = None) -> DataFrame:
     path_bytes = path.encode('utf-8')
     schema_json = json.dumps(schema).encode() if schema else None
 
-    ptr = lib.pardox_load_manager_csv(path_bytes, schema_json, None)
+    ptr = lib.hf_load_csv(path_bytes, schema_json, None)
 
     if not ptr:
         raise RuntimeError(f"Failed to load CSV: {path}")
@@ -519,7 +520,7 @@ def read_csv(path: str, schema: dict = None) -> DataFrame:
 def read_json(path: str) -> DataFrame:
     """Load JSON/NDJSON file into DataFrame."""
     path_bytes = path.encode('utf-8')
-    ptr = lib.pardox_load_manager_json(path_bytes)
+    ptr = lib.hf_load_json(path_bytes)
 
     if not ptr:
         raise RuntimeError(f"Failed to load JSON: {path}")
@@ -532,7 +533,7 @@ def read_sql(connection_string: str, query: str) -> DataFrame:
     Execute SQL query and return results as DataFrame.
 
     Args:
-        connection_string: Database connection (e.g., "postgresql://user:pass@host/db")
+        connection_string: PostgreSQL connection string
         query: SQL SELECT query
 
     Returns:
@@ -541,7 +542,7 @@ def read_sql(connection_string: str, query: str) -> DataFrame:
     conn_bytes = connection_string.encode('utf-8')
     query_bytes = query.encode('utf-8')
 
-    ptr = lib.pardox_scan_sql(conn_bytes, query_bytes)
+    ptr = lib.hf_scan_sql(conn_bytes, query_bytes)
 
     if not ptr:
         raise RuntimeError(f"SQL query failed: {query}")
@@ -556,7 +557,7 @@ This chapter covered:
 - **FFI Setup**: Loading platform-specific shared libraries with `ctypes`
 - **Type Signatures**: Defining `argtypes` and `restype` for safe calls
 - **Pythonic Wrappers**: DataFrame class with mixins for organization
-- **Memory Management**: `__del__` calling `pardox_free_manager()` to prevent leaks
+- **Memory Management**: `__del__` calling `hf_free_manager()` to prevent leaks
 - **Error Handling**: Null pointer returns and thread-local error buffers
 - **Type Conversion**: JSON bridge for complex data structures
 - **SDK Structure**: Organizing the Python package for distribution

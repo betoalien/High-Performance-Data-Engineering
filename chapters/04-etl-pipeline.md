@@ -10,6 +10,36 @@ description: Practical ETL examples with extraction, transformation, loading, an
 
 This chapter demonstrates building a complete ETL (Extract, Transform, Load) pipeline using our hybrid Rust+Python SDK. We'll process real-world data and benchmark performance against pure Python alternatives.
 
+## From Build to Run
+
+In Chapters 2 and 3, we built two things:
+
+- A **Rust shared library** (`hyperframe-core`) that implements columnar storage and compute kernels
+- A **Python SDK** (`hyperframe_sdk/`) with `ctypes` bindings that loads and calls that library
+
+Before writing any pipeline code, compile and install what you built:
+
+```bash
+# 1. Build the Rust shared library (Chapter 2)
+cd hyperframe-core/
+cargo build --release
+
+# Output by platform:
+# Linux:   target/release/libhyperframe_core.so
+# macOS:   target/release/libhyperframe_core.dylib
+# Windows: target/release/hyperframe_core.dll
+
+# 2. Copy the binary into the Python SDK's libs/ directory (Chapter 3)
+# Linux example:
+cp target/release/libhyperframe_core.so ../hyperframe_sdk/hyperframe/libs/Linux/
+
+# 3. Install the Python SDK in editable mode
+cd ../hyperframe_sdk/
+pip install -e .
+```
+
+Now `from hyperframe import DataFrame` resolves to the SDK you built, backed by the Rust engine you compiled.
+
 ## Pipeline Architecture
 
 Our ETL pipeline follows this flow:
@@ -78,7 +108,7 @@ if __name__ == "__main__":
 
 ```python
 # extract.py
-from pardox import DataFrame, read_csv
+from hyperframe import DataFrame, read_csv
 
 def extract_orders(csv_path: str) -> DataFrame:
     """
@@ -127,7 +157,7 @@ def extract_from_database(conn_string: str, query: str) -> DataFrame:
     """
     Extract data from a database using SQL.
 
-    Supports PostgreSQL, MySQL, and SQL Server.
+    Supports PostgreSQL connections.
     """
     df = read_sql(conn_string, query)
     return df
@@ -148,7 +178,7 @@ orders = extract_from_database(
 
 ```python
 # transform.py
-from pardox import DataFrame
+from hyperframe import DataFrame
 
 def clean_data(df: DataFrame) -> DataFrame:
     """
@@ -223,7 +253,7 @@ def enrich_with_customer_data(orders: DataFrame, customers: DataFrame) -> DataFr
 
 ```python
 # load.py
-from pardox import DataFrame
+from hyperframe import DataFrame
 
 def aggregate_by_region(df: DataFrame) -> DataFrame:
     """
@@ -289,7 +319,7 @@ def write_to_database(df: DataFrame, conn_string: str, table_name: str):
 
 ```python
 # pipeline.py
-from pardox import DataFrame, read_csv
+from hyperframe import DataFrame, read_csv
 import time
 
 def run_etl_pipeline(input_path: str, output_path: str):
@@ -329,8 +359,9 @@ def run_etl_pipeline(input_path: str, output_path: str):
     print("Regional Summary:")
     print(summary.to_pandas())
 
-    # Write output
-    write_parquet(df, output_path)
+    # Write output (using .to_parquet() from the WritersMixin in our SDK)
+    df.to_parquet(output_path, compression="snappy", row_group_size=100_000)
+    print(f"  Wrote {df.shape[0]:,} rows to {output_path}")
 
     elapsed = time.time() - start_time
     print(f"\nPipeline completed in {elapsed:.2f} seconds")
@@ -349,7 +380,7 @@ if __name__ == "__main__":
 # benchmark.py
 import time
 import pandas as pd
-from pardox import DataFrame, read_csv
+from hyperframe import DataFrame, read_csv
 
 def benchmark_csv_load(path: str, n_runs=3):
     """Benchmark CSV loading performance."""

@@ -16,11 +16,11 @@ from typing import Callable, Dict, List
 
 # Try to import all comparison targets
 try:
-    from pardox import DataFrame as RustDataFrame, read_csv
+    from hyperframe import DataFrame as RustDataFrame, read_csv
     HAS_RUST = True
 except ImportError:
     HAS_RUST = False
-    print("Warning: pardox SDK not available - skipping Rust benchmarks")
+    print("Warning: hyperframe SDK not available - skipping Rust benchmarks")
 
 try:
     import pandas as pd

@@ -6,7 +6,7 @@ has_children: false
 description: Jupyter notebooks for exploratory data analysis with the hybrid Rust+Python engine
 ---
 
-# Chapter 5: Interactive Data Engineering (Jupyter Labs)
+# Chapter 5: Interactive Data Engineering (JupyterLab)
 
 This chapter demonstrates how to use Jupyter notebooks for interactive data exploration using our hybrid Rust+Python DataFrame engine. We'll walk through a complete end-to-end workflow.
 
@@ -21,7 +21,7 @@ source .venv/bin/activate  # Linux/macOS
 # or: .venv\Scripts\activate  # Windows
 
 # Install the SDK
-pip install -e pardox_project_sdk/
+pip install -e hyperframe_sdk/
 
 # Install Jupyter and visualization libraries
 pip install jupyterlab matplotlib seaborn
@@ -39,7 +39,7 @@ jupyter lab --notebook-dir=./notebooks
 
 ```python
 # Cell 1: Setup
-from pardox import DataFrame, read_csv
+from hyperframe import DataFrame, read_csv
 import time
 
 print("SDK loaded - Rust engine ready!")
@@ -73,16 +73,20 @@ df.describe()
 ```python
 # Cell 6: Unique value counts
 print("Product categories:")
-print(df["category"].value_counts())
+category_counts = df.group_by("category").agg({"price": "count"})
+print(category_counts)
 
 print("\nRegional distribution:")
-print(df["region"].value_counts())
+region_counts = df.group_by("region").agg({"price": "count"})
+print(region_counts)
 ```
 
 ```python
 # Cell 7: Correlation analysis
-numeric_df = df.select_dtypes(["Int64", "Float64"])
-numeric_df.corr()
+# Export specific numeric columns to pandas for statistical functions
+# (use Rust for scale, pandas for statistics on aggregated data)
+numeric_pdf = df[["price", "quantity", "discount"]].to_pandas()
+print(numeric_pdf.corr().round(3))
 ```
 
 ## Notebook 2: Data Transformation Pipeline
@@ -104,11 +108,10 @@ for col in raw_df.columns:
         print(f"  {col}: {null_count:,}")
 
 # Fill strategies
-clean_df = raw_df.fillna({
-    "quantity": 0,
-    "discount": 0.0,
-    "region": "Unknown"
-})
+raw_df.fill_na("quantity", 0)
+raw_df.fill_na("discount", 0.0)
+raw_df.fill_na("region", "Unknown")
+clean_df = raw_df
 ```
 
 ```python
@@ -120,7 +123,7 @@ clean_df["customer_id"] = clean_df["customer_id"].astype("Utf8")
 ```python
 # Cell 4: Feature engineering
 clean_df["revenue"] = clean_df["quantity"] * clean_df["price"] * (1 - clean_df["discount"])
-clean_df["order_month"] = clean_df["order_date"].dt.strftime("%Y-%m")
+clean_df["order_month"] = clean_df["order_date"].str.slice(0, 7)  # Extract "YYYY-MM"
 clean_df["is_high_value"] = clean_df["revenue"] > 1000
 ```
 
@@ -147,8 +150,10 @@ monthly.head(12)
 
 ```python
 # Cell 2: Year-over-year growth
-monthly["revenue_pct_change"] = monthly["revenue"].pct_change(12)  # 12-month lag
-monthly.tail(6)
+# Use pandas for statistical operations on the aggregated (small) result
+monthly_pd = monthly.to_pandas()
+monthly_pd["revenue_pct_change"] = monthly_pd["revenue"].pct_change(12) * 100
+print(monthly_pd.tail(6))
 ```
 
 ### Customer Segmentation
@@ -182,19 +187,20 @@ rfm.head()
 
 ```python
 # Cell 4: Cohort retention
+# Get first order date per customer (this is the cohort date)
 first_order = clean_df.group_by("customer_id").agg({
     "order_date": "min"
-}).rename(columns={"order_date": "cohort_month"})
-
-cohort_data = clean_df.join(first_order, on="customer_id")
-cohort_data["cohort_month"] = cohort_data["cohort_month"].dt.strftime("%Y-%m")
-cohort_data["order_month"] = cohort_data["order_date"].dt.strftime("%Y-%m")
-
-cohort_pivot = cohort_data.group_by(["cohort_month", "order_month"]).agg({
-    "customer_id": "nunique"
 })
+first_order["cohort_month"] = first_order["order_date"].str.slice(0, 7)
 
-cohort_pivot.head()
+# For complex pivoting, bridge to pandas on the already-aggregated small result
+first_order_pd = first_order.to_pandas()[["customer_id", "cohort_month"]]
+cohort_pd = clean_df.to_pandas()
+cohort_pd = cohort_pd.merge(first_order_pd, on="customer_id")
+cohort_pd["order_month"] = cohort_pd["order_date"].str[:7]
+
+cohort_pivot = cohort_pd.groupby(["cohort_month", "order_month"])["customer_id"].nunique()
+print(cohort_pivot.head(10))
 ```
 
 ## Notebook 4: Performance Demonstration
@@ -268,12 +274,12 @@ print(grouped)
 # Cell 5: Memory efficiency
 import sys
 
-# Get memory estimate from Rust engine
-memory_bytes = df.memory_usage(deep=True)
-memory_mb = memory_bytes / (1024 * 1024)
-
-print(f"Memory usage for 1M rows: {memory_mb:.1f} MB")
-print(f"Bytes per row: {memory_bytes / 1_000_000:.1f}")
+# Estimate memory: our engine uses columnar layout with fixed-width types
+n_rows, n_cols = df.shape
+# ~8 bytes per value for Int64/Float64; strings vary by length
+estimated_mb = (n_rows * n_cols * 8) / (1024 * 1024)
+print(f"Memory estimate for {n_rows:,} rows × {n_cols} cols: ~{estimated_mb:.0f} MB")
+print(f"  (Actual: less for sparse/string columns, this is an upper bound for fixed-width)")
 ```
 
 ## Interactive Visualization
@@ -326,25 +332,22 @@ _ = df.shape  # or df.head()
 ### 2. Memory Management
 
 ```python
-# Explicitly delete large DataFrames when done
-del large_df
-
-# Or use context manager pattern
-with DataFrameScope() as df:
-    df = read_csv("temp_analysis.csv")
-    result = df.group_by("category").sum()
-# Automatically freed when exiting context
+# Explicitly delete large DataFrames to trigger Rust memory release
+temp_df = read_csv("temp_analysis.csv")
+result = temp_df.group_by("category").agg({"value": "sum"})
+del temp_df  # Calls __del__ → hf_free_manager() → Rust heap freed immediately
 ```
 
 ### 3. Caching Intermediate Results
 
 ```python
-# Cache expensive transformations
-filtered_df = df[df["revenue"] > 1000].cache()
+# Rust operations are fast enough that intermediate DataFrames
+# can be reused directly without explicit caching
+filtered_df = df[df["revenue"] > 1000]
 
-# Now filtered_df can be used multiple times without recomputing
-result1 = filtered_df.group_by("region").sum()
-result2 = filtered_df.group_by("category").mean()
+# Both operations reuse the already-materialized filtered_df in memory
+result1 = filtered_df.group_by("region").agg({"revenue": "sum"})
+result2 = filtered_df.group_by("category").agg({"revenue": "mean"})
 ```
 
 ## Troubleshooting

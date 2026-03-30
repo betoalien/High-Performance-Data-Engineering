@@ -67,7 +67,7 @@ Rust provides:
 │                   Rust Core Engine                          │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  HyperBlock Manager (Columnar Storage)              │   │
-│  │  - Contiguous memory布局                             │   │
+│  │  - Contiguous memory layout                          │   │
 │  │  - Cache-friendly access patterns                    │   │
 │  └─────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────┐   │
@@ -100,7 +100,7 @@ Rust provides:
 3. **Python Wrapper Layer**
    - `DataFrame` class wraps raw pointers to Rust `HyperBlockManager`
    - Mixin classes organize functionality (MathMixin, SqlMixin, etc.)
-   - Automatic memory cleanup via `__del__` calling `pardox_free_manager()`
+   - Automatic memory cleanup via `__del__` calling `hf_free_manager()`
 
 ### Memory Flow
 
@@ -120,7 +120,7 @@ Python operates via FFI calls
 Python GC triggers __del__
          │
          ▼
-pardox_free_manager() releases Rust memory
+hf_free_manager() releases Rust memory
 ```
 
 ### Performance Characteristics
@@ -129,7 +129,7 @@ pardox_free_manager() releases Rust memory
 |-----------|-------------|-------------------|---------|
 | CSV Load (1M rows) | 2.5s | 0.3s | **8.3x** |
 | Filter + Aggregate | 1.8s | 0.15s | **12x** |
-| Hash Join (1M x 1M) | 45s | 2.1s | **21x** |
+| Hash Join (1M x 1M) | >300s | 2.1s | **>140x** |
 | GroupBy Aggregation | 3.2s | 0.4s | **8x** |
 
 ## Summary

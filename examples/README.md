@@ -40,7 +40,7 @@ python benchmark.py --rows 100000
 ## Requirements
 
 ```bash
-pip install -e ../pardox_project_sdk/
+pip install -e ../hyperframe_sdk/
 pip install pandas  # For comparison benchmarks
 ```
 

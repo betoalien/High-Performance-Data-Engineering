@@ -19,7 +19,8 @@ dataengineering_rust_python/
 │   └── benchmark.py         # Performance benchmarks
 └── notebooks/
     ├── 01-getting-started.ipynb   # Interactive introduction
-    └── 02-etl-workflow.ipynb      # End-to-end workflow
+    ├── 02-etl-pipeline.ipynb      # Self-contained ETL demo (generates its own data)
+    └── 02-etl-workflow.ipynb      # End-to-end workflow (requires a real CSV file)
 ```
 
 ## Quick Start
@@ -46,8 +47,8 @@ Then open http://localhost:4000/dataengineering_rust_python/
 python -m venv .venv
 source .venv/bin/activate  # Linux/macOS
 
-# Install dependencies (you'll need the pardox SDK)
-pip install -e ../pardox_project_sdk/
+# Install dependencies (you'll need the hyperframe SDK)
+pip install -e ../hyperframe_sdk/
 pip install jupyterlab matplotlib pandas
 
 # Run the ETL pipeline
