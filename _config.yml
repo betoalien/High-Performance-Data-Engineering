@@ -1,29 +1,25 @@
 # GitHub Pages configuration for "Just the Docs" theme
 title: High-Performance Data Engineering
 description: A comprehensive course on integrating Python and Rust for high-performance data pipelines
-theme: just-the-docs
 
-# Base URL for GitHub Pages
-baseurl: "/High-Performance-Data-Engineering"
+# Theme setup for GitHub Pages
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+
+# URL configuration
+# 'url' is the custom domain, 'baseurl' is the repository name starting with a slash
 url: "https://betoalien.com"
+baseurl: "/High-Performance-Data-Engineering"
 
-# Navigation settings
-nav_order:
-  - index.md
-  - chapters/01-introduction.md
-  - chapters/02-rust-core.md
-  - chapters/03-python-sdk.md
-  - chapters/04-etl-pipeline.md
-  - chapters/05-jupyter-lab.md
-
-# Aux links (shown in header)
+# Aux links (shown in header top right)
 aux_links:
   "View on GitHub": "https://github.com/betoalien/High-Performance-Data-Engineering"
 
-# Enable search
+# Enable search bar functionality
 search_enabled: true
 
-# Color scheme
+# Color scheme (can be 'light' or 'dark')
 color_scheme: light
 
 # Mermaid diagrams support
