@@ -1,0 +1,33 @@
+# GitHub Pages configuration for "Just the Docs" theme
+title: High-Performance Data Engineering
+description: A comprehensive course on integrating Python and Rust for high-performance data pipelines
+theme: just-the-docs
+
+# Base URL for GitHub Pages
+baseurl: "/dataengineering_rust_python"
+url: "https://yourusername.github.io"
+
+# Navigation settings
+nav_order:
+  - index.md
+  - chapters/01-introduction.md
+  - chapters/02-rust-core.md
+  - chapters/03-python-sdk.md
+  - chapters/04-etl-pipeline.md
+  - chapters/05-jupyter-lab.md
+
+# Aux links (shown in header)
+aux_links:
+  "View on GitHub": "https://github.com/yourusername/dataengineering_rust_python"
+
+# Enable search
+search_enabled: true
+
+# Color scheme
+color_scheme: light
+
+# Mermaid diagrams support
+mermaid:
+  version: "9.1.3"
+  config:
+    startOnLoad: true
