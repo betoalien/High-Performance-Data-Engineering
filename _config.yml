@@ -5,7 +5,7 @@ theme: just-the-docs
 
 # Base URL for GitHub Pages
 baseurl: "/dataengineering_rust_python"
-url: "https://yourusername.github.io"
+url: "https://betoalien.com"
 
 # Navigation settings
 nav_order:
@@ -18,7 +18,7 @@ nav_order:
 
 # Aux links (shown in header)
 aux_links:
-  "View on GitHub": "https://github.com/yourusername/dataengineering_rust_python"
+  "View on GitHub": "https://github.com/betoalien/High-Performance-Data-Engineering"
 
 # Enable search
 search_enabled: true
