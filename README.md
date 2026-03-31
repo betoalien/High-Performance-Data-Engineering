@@ -9,11 +9,22 @@ dataengineering_rust_python/
 ├── index.md                 # Course overview
 ├── _config.yml              # GitHub Pages configuration
 ├── chapters/
-│   ├── 01-introduction.md   # The Need for Speed
-│   ├── 02-rust-core.md      # Building the Rust Engine
-│   ├── 03-python-sdk.md     # Bridging the Gap (FFI)
-│   ├── 04-etl-pipeline.md   # Building the ETL Pipeline
-│   └── 05-jupyter-lab.md    # Interactive Data Engineering
+│   ├── 01-introduction.md   # Ch 1 - The Case for Rust in Data Engineering
+│   ├── 02-rust-core.md      # Ch 2 - Columnar Storage from Scratch in Rust
+│   ├── 03-python-sdk.md     # Ch 3 - Bridging Rust and Python with ctypes
+│   ├── 04-apache-arrow.md   # Ch 4 - Apache Arrow: Zero-Copy Interoperability
+│   ├── 05-parallelism.md    # Ch 5 - Parallelism Without the GIL
+│   ├── 06-async-io.md       # Ch 6 - Async I/O with Tokio
+│   ├── 07-etl-pipeline.md   # Ch 7 - Building the ETL Pipeline
+│   └── 10-jupyter-lab.md    # Ch 10 - Interactive Data Engineering (JupyterLab)
+├── hyperframe_sdk/          # Python package students install
+│   ├── setup.py
+│   └── hyperframe/
+│       ├── __init__.py
+│       ├── wrapper.py       # ctypes FFI bindings
+│       ├── frame.py         # DataFrame class
+│       ├── series.py        # Series class
+│       └── io.py            # read_csv, read_ndjson
 ├── examples/
 │   ├── etl_pipeline.py      # Complete ETL example
 │   └── benchmark.py         # Performance benchmarks
@@ -66,8 +77,11 @@ jupyter lab notebooks/
 1. **Why Rust + Python**: Understanding the performance characteristics and use cases
 2. **Rust Core Development**: Building columnar data structures, compute kernels, and FFI exports
 3. **Python SDK Design**: Creating Pythonic wrappers with ctypes, memory management, error handling
-4. **ETL Pipelines**: Building production-ready data pipelines with the hybrid engine
-5. **Interactive Analysis**: Using Jupyter notebooks for exploratory data analysis
+4. **Apache Arrow**: Zero-copy data interchange between Rust, Python, Pandas, and DuckDB
+5. **Parallelism**: Rayon work-stealing parallel compute that bypasses the GIL
+6. **Async I/O**: Concurrent file ingestion with Tokio
+7. **ETL Pipelines**: Building production-ready data pipelines with the hybrid engine
+8. **Interactive Analysis**: Using Jupyter notebooks for exploratory data analysis
 
 ## Prerequisites
 

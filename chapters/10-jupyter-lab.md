@@ -1,12 +1,12 @@
 ---
-title: Chapter 5 - Interactive Data Engineering
+title: Chapter 10 - Interactive Data Engineering
 parent: High-Performance Data Engineering
-nav_order: 6
+nav_order: 11
 has_children: false
 description: Jupyter notebooks for exploratory data analysis with the hybrid Rust+Python engine
 ---
 
-# Chapter 5: Interactive Data Engineering (JupyterLab)
+# Chapter 10: Interactive Data Engineering (JupyterLab)
 
 This chapter demonstrates how to use Jupyter notebooks for interactive data exploration using our hybrid Rust+Python DataFrame engine. We'll walk through a complete end-to-end workflow.
 

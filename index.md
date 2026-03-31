@@ -24,11 +24,16 @@ By combining these languages, you can build data pipelines that are:
 
 | Chapter | Title | Description |
 |---------|-------|-------------|
-| [Chapter 1](chapters/01-introduction.md) | The Need for Speed | Introduction to high-performance data engineering and hybrid architectures |
-| [Chapter 2](chapters/02-rust-core.md) | The Rust Core | Building memory-safe data structures and concurrent processing in Rust |
-| [Chapter 3](chapters/03-python-sdk.md) | Bridging the Gap | FFI bindings, PyO3, and designing Pythonic wrappers |
-| [Chapter 4](chapters/04-etl-pipeline.md) | Building the ETL Pipeline | Practical examples of extraction, transformation, and loading |
-| [Chapter 5](chapters/05-jupyter-lab.md) | Interactive Data Engineering | Jupyter notebooks for exploratory data analysis |
+| [Chapter 1](chapters/01-introduction.md) | The Case for Rust in Data Engineering | Why Python alone isn't enough and how Rust fills the gap |
+| [Chapter 2](chapters/02-rust-core.md) | Columnar Storage from Scratch in Rust | Building a type-safe columnar data engine with parallel compute kernels |
+| [Chapter 3](chapters/03-python-sdk.md) | Bridging Rust and Python with ctypes | FFI bindings, memory ownership, and designing Pythonic wrappers |
+| [Chapter 4](chapters/04-apache-arrow.md) | Apache Arrow: Zero-Copy Interoperability | Using Arrow IPC to transfer data between Rust and Python without copying |
+| [Chapter 5](chapters/05-parallelism.md) | Parallelism Without the GIL | Rayon data-parallel operations that bypass Python's Global Interpreter Lock |
+| [Chapter 6](chapters/06-async-io.md) | Async I/O with Tokio | Concurrent data ingestion from multiple sources using Tokio |
+| [Chapter 7](chapters/07-etl-pipeline.md) | Building the ETL Pipeline | Practical examples of extraction, transformation, loading, and benchmarks |
+| Chapter 8 | Testing and Reliability | Unit, integration, and property-based testing for hybrid Rust+Python systems *(coming soon)* |
+| Chapter 9 | Profiling and Optimization | Flamegraphs, SIMD tuning, and memory profiling *(coming soon)* |
+| [Chapter 10](chapters/10-jupyter-lab.md) | Interactive Data Engineering | Jupyter notebooks for exploratory data analysis with the hybrid engine |
 
 ## Prerequisites
 

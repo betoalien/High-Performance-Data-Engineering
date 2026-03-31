@@ -1,0 +1,11 @@
+Place compiled Rust binaries here:
+
+  libs/Linux/libhyperframe_core.so
+  libs/Mac/libhyperframe_core-arm64.dylib
+  libs/Mac/libhyperframe_core-x86_64.dylib
+  libs/Win/hyperframe_core.dll
+
+Build instructions:
+  cd hyperframe-core/
+  cargo build --release
+  cp target/release/libhyperframe_core.so ../hyperframe_sdk/hyperframe/libs/Linux/

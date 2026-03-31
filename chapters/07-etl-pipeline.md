@@ -1,12 +1,12 @@
 ---
-title: Chapter 4 - Building the ETL Pipeline
+title: Chapter 7 - Building the ETL Pipeline
 parent: High-Performance Data Engineering
-nav_order: 5
+nav_order: 8
 has_children: false
 description: Practical ETL examples with extraction, transformation, loading, and performance benchmarks
 ---
 
-# Chapter 4: Building the ETL Pipeline
+# Chapter 7: Building the ETL Pipeline
 
 This chapter demonstrates building a complete ETL (Extract, Transform, Load) pipeline using our hybrid Rust+Python SDK. We'll process real-world data and benchmark performance against pure Python alternatives.
 
