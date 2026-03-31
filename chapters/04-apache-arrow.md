@@ -1,5 +1,5 @@
 ---
-title: Chapter 4 - Apache Arrow: Zero-Copy Interoperability
+title: "Chapter 4 - Apache Arrow: Zero-Copy Interoperability"
 parent: High-Performance Data Engineering
 nav_order: 5
 has_children: false

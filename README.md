@@ -1,5 +1,7 @@
 # High-Performance Data Engineering: Integrating Python and Rust
 
+**Live course site**: [betoalien.com/High-Performance-Data-Engineering](https://betoalien.com/High-Performance-Data-Engineering/)
+
 This repository contains a comprehensive course on building hybrid data engineering systems that combine Python's flexibility with Rust's speed and memory safety.
 
 ## Course Structure
@@ -100,6 +102,13 @@ The hybrid Rust+Python approach demonstrated in this course achieves:
 | GroupBy Aggregation | 5-8x faster |
 | Hash Joins | 7-10x faster |
 | Memory Usage | 60-65% reduction |
+
+## Author
+
+**Alberto Cardenas** — data engineer and systems architect.
+
+- Website: [betoalien.com](https://betoalien.com)
+- Contact: [iam@albertocardenas.com](mailto:iam@albertocardenas.com)
 
 ## License
 

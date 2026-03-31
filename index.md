@@ -51,6 +51,13 @@ By the end of this course, you will have:
 3. A complete ETL pipeline demonstrating the hybrid architecture
 4. Interactive Jupyter notebooks for data exploration
 
+## About the Author
+
+This course was written by **Alberto Cardenas**, a data engineer and systems architect specializing in high-performance data infrastructure. Alberto bridges the gap between Python's expressive ecosystem and Rust's systems-level performance.
+
+- **Website**: [betoalien.com](https://betoalien.com)
+- **Contact**: [iam@albertocardenas.com](mailto:iam@albertocardenas.com)
+
 ## License
 
 This course material is provided for educational purposes.

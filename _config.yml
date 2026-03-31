@@ -1,6 +1,7 @@
 # GitHub Pages configuration for "Just the Docs" theme
 title: High-Performance Data Engineering
 description: A comprehensive course on integrating Python and Rust for high-performance data pipelines
+author: Alberto Cardenas
 
 # Theme setup for GitHub Pages
 remote_theme: just-the-docs/just-the-docs
@@ -15,6 +16,7 @@ baseurl: "/High-Performance-Data-Engineering"
 # Aux links (shown in header top right)
 aux_links:
   "View on GitHub": "https://github.com/betoalien/High-Performance-Data-Engineering"
+  "Alberto Cardenas": "https://betoalien.com"
 
 # Enable search bar functionality
 search_enabled: true
