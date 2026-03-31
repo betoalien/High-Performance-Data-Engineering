@@ -2,6 +2,7 @@
 title: High-Performance Data Engineering
 layout: home
 nav_order: 1
+has_children: true
 description: A comprehensive course on integrating Python and Rust for high-performance data pipelines
 ---
 
@@ -31,8 +32,8 @@ By combining these languages, you can build data pipelines that are:
 | [Chapter 5](chapters/05-parallelism.md) | Parallelism Without the GIL | Rayon data-parallel operations that bypass Python's Global Interpreter Lock |
 | [Chapter 6](chapters/06-async-io.md) | Async I/O with Tokio | Concurrent data ingestion from multiple sources using Tokio |
 | [Chapter 7](chapters/07-etl-pipeline.md) | Building the ETL Pipeline | Practical examples of extraction, transformation, loading, and benchmarks |
-| Chapter 8 | Testing and Reliability | Unit, integration, and property-based testing for hybrid Rust+Python systems *(coming soon)* |
-| Chapter 9 | Profiling and Optimization | Flamegraphs, SIMD tuning, and memory profiling *(coming soon)* |
+| [Chapter 8](chapters/08-testing.md) | Testing and Reliability | Unit, integration, and property-based testing for hybrid Rust+Python systems |
+| [Chapter 9](chapters/09-profiling.md) | Profiling and Optimization | Flamegraphs, SIMD tuning, and memory profiling |
 | [Chapter 10](chapters/10-jupyter-lab.md) | Interactive Data Engineering | Jupyter notebooks for exploratory data analysis with the hybrid engine |
 
 ## Prerequisites
